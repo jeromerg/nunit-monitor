@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using NUnit.Core;
 using NUnit.Core.Extensibility;
 
 namespace NunitMonitor
 {
-    [NUnitAddin(Description = "Event Timestamp Logger", Type = ExtensionType.Core)]
+    [NUnitAddin(Description = "NUnit Memory and Thread monitoring", Type = ExtensionType.Core)]
     public class NunitMonitorAddin : IAddin, EventListener
     {
         private PerfCollector mPerfCollector;
