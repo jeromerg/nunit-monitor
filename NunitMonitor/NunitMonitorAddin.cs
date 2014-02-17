@@ -1,33 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
+using System.IO;
 using NUnit.Core;
 using NUnit.Core.Extensibility;
 
 namespace NunitMonitor
 {
-    [NUnitAddin(Description = "Event Timestamp Logger")]
-    class NunitMonitorAddin
+    [NUnitAddin(Description = "Event Timestamp Logger", Type = ExtensionType.Core)]
+    public class NunitMonitorAddin : IAddin, EventListener
     {
-        private readonly PerformanceCounter[] mPerformanceCounters;
-
-        public NunitMonitorAddin()
-        {
-            string processName = Process.GetCurrentProcess().ProcessName;
-            mPerformanceCounters = new[]
-            {
-                new PerformanceCounter("Process", "Private Bytes", processName), 
-                new PerformanceCounter("Process", "Virtual Bytes", processName), 
-                new PerformanceCounter("Process", "Handle Count", processName), 
-                new PerformanceCounter("Process", "Thread Count", processName), 
-                new PerformanceCounter(".NET CLR Memory", "# Bytes in all Heaps", processName),                 
-                new PerformanceCounter(".NET CLR Loading", "Current appdomains", processName), 
-            };
-        }
+        private PerfCollector mPerfCollector;
 
         public bool Install(IExtensionHost host)
         {
+            //Debugger.Break();
+
             if (host == null)
                 throw new ArgumentNullException("host");
 
@@ -36,6 +23,21 @@ namespace NunitMonitor
                 return false;
 
             listeners.Install(this);
+
+
+            // NiceToHave: inject configuration from configuration file
+            var processName = Process.GetCurrentProcess().ProcessName;
+            var perfCounterBuilders = new[]
+            {
+                new PerfCounterBuilder("Process", "Private Bytes", processName), 
+                new PerfCounterBuilder("Process", "Virtual Bytes", processName), 
+                new PerfCounterBuilder("Process", "Handle Count", processName), 
+                new PerfCounterBuilder("Process", "Thread Count", processName), 
+                new PerfCounterBuilder(".NET CLR Memory", "# Bytes in all Heaps", processName),
+                new PerfCounterBuilder(".NET CLR Loading", "Current appdomains", processName)
+            };
+            mPerfCollector = new PerfCollector(new CsvPerfLogger(@"c:\PerfLogs", @"nunit.csv", perfCounterBuilders), perfCounterBuilders);
+
             return true;
         }
 
@@ -63,14 +65,12 @@ namespace NunitMonitor
 
         public void TestStarted(TestName testName)
         {
-            ClearMemory();
-            CollectPerformanceCounters(testName);
+            mPerfCollector.Collect(false, testName.FullName);
         }
 
         public void TestFinished(TestResult result)
         {
-            ClearMemory();
-            CollectPerformanceCounters(result.Test.TestName);
+            mPerfCollector.Collect(true, result.FullName);
         }
 
         public void TestOutput(TestOutput testOutput)
@@ -79,21 +79,6 @@ namespace NunitMonitor
 
         public void UnhandledException(Exception exception)
         {
-        }
-        #endregion
-
-        #region private helpers
-        private static void ClearMemory()
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.WaitForFullGCComplete();
-            GC.Collect();
-        }
-
-        private void CollectPerformanceCounters(TestName testName)
-        {
-            
         }
         #endregion
 

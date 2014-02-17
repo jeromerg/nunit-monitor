@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("NunitMonitor")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Rohde & Schwarz")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NunitMonitor")]
-[assembly: AssemblyCopyright("Copyright © Rohde & Schwarz 2014")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
