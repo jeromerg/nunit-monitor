@@ -20,4 +20,4 @@ Performance counters are written C:\PerfLogs\nunit.csv file.
 
 Limitations
 ===========
-It is a on-shot development. But The code has been structured to be easily extended with new performance counter, new target types and add configuration file.
+It is a one-shot development. But The code has been structured to be easily extended with new performance counters, new target types.
